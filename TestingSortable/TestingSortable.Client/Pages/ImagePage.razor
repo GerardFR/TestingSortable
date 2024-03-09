@@ -1,0 +1,61 @@
+﻿@page "/imagepage"
+@using TestingSortable.Client.Pages.Components
+@using TestingSortable.Client.Sortable
+
+<PageTitle>Images</PageTitle>
+
+@if (Images is not null)
+{
+    <h2>Sortable with component</h2>
+    <SortableList Class="d-flex flex-wrap gap-2" Id="album1" Items="Images" OnUpdate="SortList" Context="image">
+        <SortableItemTemplate>
+            <ImageComponent ImagePath="@image" />
+        </SortableItemTemplate>
+    </SortableList>
+
+    <h2>Sortable without component</h2>
+    <SortableList Class="d-flex flex-wrap gap-2" Id="album2" Items="Images" OnUpdate="SortList" Context="image">
+        <SortableItemTemplate>
+            <img src="@image" alt="Image not found" />
+        </SortableItemTemplate>
+    </SortableList>
+
+    <h2 class="mt-3">Not sortable</h2>
+    <div class="d-flex flex-wrap gap-2">
+        @foreach (var image in Images)
+        {
+            <ImageComponent ImagePath="@image" />
+        }
+    </div>
+
+}
+
+@code {
+    public List<string>? Images { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Images = Enumerable.Range(1, 6).Select(x => $"Images/{x}.jpg").ToList();
+    }
+
+    private void SortList((int oldIndex, int newIndex) indices)
+    {
+        // deconstruct the tuple
+        var (oldIndex, newIndex) = indices;
+
+        var itemToMove = Images![oldIndex];
+        Images.RemoveAt(oldIndex);
+
+        if (newIndex < Images.Count)
+        {
+            Images.Insert(newIndex, itemToMove);
+        }
+        else
+        {
+            Images.Add(itemToMove);
+        }
+
+        StateHasChanged();
+    }
+}
+}
